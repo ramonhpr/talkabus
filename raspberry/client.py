@@ -1,7 +1,6 @@
 #coding: utf-8
 from socket import *
 import subprocess
-import os
 
 #a ideia de criar essa função de pegar o ip foi pela "instabilidade" da
 #função da biblioteca de sockets em python que retornava ips indesejáveis
