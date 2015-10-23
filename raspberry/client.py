@@ -4,6 +4,7 @@ import subprocess
 
 #a ideia de criar essa função de pegar o ip foi pela "instabilidade" da
 #função da biblioteca de sockets em python que retornava ips indesejáveis
+
 def getIp():	#retorna uma string com o ip da rede wifi, se não estiver conectado a uma rede retona string vazia
 	ip=''
 	'''
@@ -15,30 +16,36 @@ def getIp():	#retorna uma string com o ip da rede wifi, se não estiver conectad
 	'''
 	depois executo o método communicate para executar o comando linux
 	retornando uma string no formato:
-	'inet addr:<IP>  Bcast:<Ip_do_roteador>  Mask:255.255.255.0'
-
-	como o ip tem 11 carateres basta pegar a substring apartir dos ':'
+	'inet addr:<IP>  Bcast:<Ip_do_roteador>  Mask:255.255.255.0', e
+	como o ip tem 11 carateres basta pegar os 11 carateres da substring 
+	apartir dos ':'
 	'''
-	string=cmd.communicate()[0]
+	string=cmd.communicate()[0]		#retorna uma lista tamanho 2, onde o indice 0 contem a saida do comando
 
 	if string=='':
 		ip=string
-	else:	#se não retornou string vazia 
-		indice=string.find(':')+1		#retorna o indice que contém o primeiro ':' que houver na string 
+	else:
+		indice=string.find(':')+1		#retorna o indice que contém o primeiro ':' que houver na string (o +1 é pra substring nao ter o dois pontos) 
 		ip=string[indice:indice+11]		#retorna uma substring apartir de certo indice,até 11 carateres a mais (que é o tamanho de um endereço ip)
 
 	return ip
 
 class Onibus(object):
-	"""docstring for Onibus"""
+	"""
+	Objeto onibus que tem 4 atributos: o endereço, o socket ,
+	seu nome e o buzzer
+	Além de ter um metodo para se conectar ao socket em dado endereço.
+	 """
 	addr=()
-	sockTcp = socket(AF_INET,SOCK_STREAM)		#cria um socket usando comunicação tcp IPv4
+	sockTcp = None
 	nome = 'barro macaxeira'
+	buzzer=None
 
 	def __init__(self, host,port):
 		self.addr = (host,port)		#colocando o endereço como uma tupla para a função connect do socket
 
 	def conectar(self):
+		self.sockTcp = socket(AF_INET,SOCK_STREAM)		#cria um socket usando comunicação tcp IPv4
 		try:
 			self.sockTcp.connect(self.addr)							#se conecta ao endereço determinado 
 		except Exception, e:
