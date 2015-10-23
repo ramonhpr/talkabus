@@ -20,7 +20,7 @@ def getIp():	#retorna uma string com o ip da rede wifi, se não estiver conectad
 	como o ip tem 11 carateres basta pegar os 11 carateres da substring 
 	apartir dos ':'
 	'''
-	string=cmd.communicate()[0]		#retorna uma lista tamanho 2, onde o indice 0 contem a saida do comando
+	string = cmd.communicate()[0]		#retorna uma lista tamanho 2, onde o indice 0 contem a saida do comando
 
 	if string=='':
 		ip=string
