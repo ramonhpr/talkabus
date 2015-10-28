@@ -5,14 +5,14 @@ import socket, os, threading
 
 PORT = 5050 # porta para conexão
 
-class Server(threading.Thread):                                             #IP do server para testes reais: 192.168.1.100 
-                                                                            #
+class Server(threading.Thread):                             #IP do server para testes reais: 192.168.1.100 
+                                                            #IP do server para testes locais: "localhost"
     def __init__(self, port, host='localhost'):
         threading.Thread.__init__(self)
         self.port = port
         self.host = host
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.users = [] 													# Lista de uuários conectados ao servidor
+        self.users = [] 									# Lista de usários conectados ao servidor
 
         try:
             self.server.bind((self.host, self.port))
@@ -20,7 +20,7 @@ class Server(threading.Thread):                                             #IP 
             print('Bind failed %s' % (socket.error))
             os._exit(1)
 
-        self.server.listen(20) 												# server pode aceitar 20 conexões simultâneas 
+        self.server.listen(20) 								# server pode aceitar 20 conexões simultâneas 
         
     def commandLine(self):        
         while True:
