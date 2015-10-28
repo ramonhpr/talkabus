@@ -1,4 +1,4 @@
-#coding: utf-8
+s#coding: utf-8
 from socket import *
 import subprocess
 
@@ -55,7 +55,7 @@ class Onibus(object):
 if __name__ == '__main__':
 	
 	isconnected=False
-	bus = Onibus(getIp(),5050)		#Como não tenho o Ip estatico ainda, estou colocando meu proprio ip
+	bus = Onibus("192.168.1.100",5050)
 	while not isconnected:
 		bus.conectar()
 		#haverá mais coisas aqui
