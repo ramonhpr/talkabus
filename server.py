@@ -63,5 +63,3 @@ if __name__ == '__main__':
     # Roda servidor
     server.run()
 
-    # Send a message to the chat server
-
