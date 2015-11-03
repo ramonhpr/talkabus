@@ -11,22 +11,28 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Locale;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements TextToSpeech.OnInitListener {
 
     TextView textResponse;
     Button buttonConnect;
+    private int MY_DATA_CHECK_CODE = 0;
+    private TextToSpeech sintV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +44,22 @@ public class MainActivity extends Activity {
 
         buttonConnect.setOnClickListener(buttonConnectOnClickListener);
 
+        Intent checkTTSIntent = new Intent();
+        checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
+
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                sintV = new TextToSpeech(this, this);
+            } else {
+                Intent installTTSIntent = new Intent();
+                installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installTTSIntent);
+            }
+        }
     }
 
     OnClickListener buttonConnectOnClickListener =
@@ -50,6 +72,17 @@ public class MainActivity extends Activity {
                             5050);
                     myClientTask.execute();
                 }};
+
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            if (sintV.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE)
+                sintV.setLanguage(Locale.US);
+            //myTts.speak("Iniciando app talkabus",TextToSpeech.QUEUE_ADD,null);
+        } else if (status == TextToSpeech.ERROR) {
+            Toast.makeText(this, "Sorry! Text To Speech failed...", Toast.LENGTH_LONG).show();
+        }
+    }
 
     public class MyClientTask extends AsyncTask<Void, Void, Void> {
 
@@ -93,6 +126,8 @@ public class MainActivity extends Activity {
                     byteArrayOutputStream.write(buffer, 0, bytesRead);
                     response += byteArrayOutputStream.toString("UTF-8");
                 }
+                //Fala pelo sintetizador de voz o que foi recebido
+                sintV.speak(response,TextToSpeech.QUEUE_ADD,null);
 
             } catch (UnknownHostException e) {
                 // TODO Auto-generated catch block
