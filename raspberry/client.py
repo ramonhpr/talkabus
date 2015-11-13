@@ -1,7 +1,8 @@
-s#coding: utf-8
+#coding: utf-8
 from socket import *
 import subprocess
-
+from pygame import mixer
+from time import sleep
 #a ideia de criar essa função de pegar o ip foi pela "instabilidade" da
 #função da biblioteca de sockets em python que retornava ips indesejáveis
 
@@ -43,13 +44,32 @@ class Onibus(object):
 
 	def __init__(self, host,port):
 		self.addr = (host,port)		#colocando o endereço como uma tupla para a função connect do socket
+		mixer.init()
+		buzzer = mixer.Sound('/home/pi/Downloads/beep15.wav')
 
 	def conectar(self):
 		self.sockTcp = socket(AF_INET,SOCK_STREAM)		#cria um socket usando comunicação tcp IPv4
 		try:
-			self.sockTcp.connect(self.addr)							#se conecta ao endereço determinado 
+			self.sockTcp.connect(self.addr)		#se conecta ao endereço determinado 
+			self.sockTcp.settimeout(10)			#setando o tempo de espera para solicitar parada
+			self.sockTcp.sendall('bus '+bus.nome)		#envia o nome do ônibus
+			print 'Conectado'
+			return True
 		except Exception, e:
 			print 'Não foi possivel se conectar'
+
+			return False
+
+	def espera_solicitar_parada(self):
+		resposta=None
+		try:
+			resposta = self.sockTcp.recv(1024)
+			print resposta
+			if resposta=='stop':
+				buzzer.play(maxtime=1500)	#apita o buzzer
+				pass
+		except Exception, e:
+			pass
 
 
 if __name__ == '__main__':
@@ -57,6 +77,14 @@ if __name__ == '__main__':
 	isconnected=False
 	bus = Onibus("192.168.1.100",5050)
 	while not isconnected:
-		bus.conectar()
-		#haverá mais coisas aqui
+		isconnected = bus.conectar()
+		
+		if isconnected:
+			bus.espera_solicitar_parada()
+			isconnected = False
+			print 'Espera um tempo até o onibus sair do range'
+			sleep(60)
+
+
+	mixer.quit()
 
