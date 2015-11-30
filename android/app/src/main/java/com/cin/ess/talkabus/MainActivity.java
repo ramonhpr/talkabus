@@ -3,6 +3,7 @@ package com.cin.ess.talkabus;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -19,14 +20,16 @@ public class MainActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        textView = (TextView) findViewById(R.id.textview);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        this.speech = new Speech(getApplicationContext());
+        this.speech = new Speech(this);
+
+        textView = (TextView) findViewById(R.id.textview);
 
         button = (Button) findViewById(R.id.button);
         buttonConfigure();
 
-        st = createSockeyTask("192.168.1.112", 5050, 5000);
+        st = createSockeyTask("192.168.1.100", 5050, 5000);
         st.execute("connectTry");
 
     }
@@ -49,10 +52,10 @@ public class MainActivity extends Activity{
                     st = null;
                     button.setEnabled(true);
 
-                }else {
+                } else {
                     if (st == null) {
                         button.setEnabled(false);
-                        st = createSockeyTask("192.168.1.112", 5050, 5000);
+                        st = createSockeyTask("192.168.1.100", 5050, 5000);
                         st.execute("connectRequest");
                         button.setEnabled(true);
                     }
@@ -65,7 +68,7 @@ public class MainActivity extends Activity{
     public SocketTask createSockeyTask(String ip,int port, int timeout)
     {
 
-        return new SocketTask(ip,port,timeout){
+        return new SocketTask(ip,port,timeout, this){
             @Override
             protected void onProgressUpdate(String... progress){
 
@@ -87,6 +90,31 @@ public class MainActivity extends Activity{
 
             }
         };
+    }
+
+    @Override
+    public void onPause()
+    {
+        if (speech != null)
+            speech.destroy();
+
+        if(st != null)
+            st.closeConnection();
+
+        super.onPause();
+
+        this.finish();
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        if (speech != null)
+            speech.destroy();
+        if(st != null)
+            st.closeConnection();
+
+        super.onBackPressed();
     }
 
 }

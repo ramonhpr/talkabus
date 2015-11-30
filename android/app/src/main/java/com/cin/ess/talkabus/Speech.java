@@ -3,9 +3,11 @@ package com.cin.ess.talkabus;
 import java.util.HashMap;
 import java.util.Locale;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.widget.Toast;
 
 public class Speech
@@ -13,6 +15,7 @@ public class Speech
     TextToSpeech t1;
     Locale myLocale;
     Context context;
+
     public Speech(Context context)
     {
         this.context = context;
@@ -35,6 +38,12 @@ public class Speech
 
     }
 
+    public void destroy() {
+        if (t1 != null) {
+            t1.stop();
+            t1.shutdown();
+        }
+    }
 
 
 }
