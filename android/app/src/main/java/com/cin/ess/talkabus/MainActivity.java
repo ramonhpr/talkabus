@@ -1,6 +1,7 @@
 package com.cin.ess.talkabus;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -11,7 +12,7 @@ public class MainActivity extends Activity{
 
     private TextView textView;
     private boolean connected = false;
-    private Button button;
+    private Button conectar, solicitarParada;
     private SocketTask st = null;
     private Speech speech;
 
@@ -26,7 +27,9 @@ public class MainActivity extends Activity{
 
         textView = (TextView) findViewById(R.id.textview);
 
-        button = (Button) findViewById(R.id.button);
+        conectar = (Button) findViewById(R.id.button);
+        solicitarParada = (Button) findViewById(R.id.button2);
+        solicitarParada.setBackgroundColor(Color.GRAY);
         buttonConfigure();
 
         st = createSockeyTask("192.168.1.100", 5050, 5000);
@@ -36,30 +39,41 @@ public class MainActivity extends Activity{
 
     //configura as ações do botão
     public void buttonConfigure() {
-        button.setOnClickListener(new View.OnClickListener() {
+        conectar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                conectar.setEnabled(false);
                 if (connected) {
-                    button.setEnabled(false);
                     if (st != null)
                         st.closeConnection();
                     connected = false;
                     textView.setText("Conexão encerrada.");
                     speech.speak(textView.getText().toString());
-                    button.setText("Conectar");
+                    conectar.setText("Conectar");
+                    conectar.setBackgroundColor(Color.parseColor("#00ff08"));
+                    solicitarParada.setEnabled(false);
                     st.cancel(true);
                     st = null;
-                    button.setEnabled(true);
-
                 } else {
                     if (st == null) {
-                        button.setEnabled(false);
                         st = createSockeyTask("192.168.1.100", 5050, 5000);
                         st.execute("connectRequest");
-                        button.setEnabled(true);
                     }
                 }
+                conectar.setEnabled(true);
+            }
+        });
+
+
+        solicitarParada.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(st != null)
+                {
+                    st.solicitarParada();
+                }
+
+
             }
         });
     }
@@ -72,22 +86,49 @@ public class MainActivity extends Activity{
             @Override
             protected void onProgressUpdate(String... progress){
 
-                if (progress[0].equals("Não existe ponto nas proximidades.")) {
+                String progresso = progress[0];
+
+                if (progresso.equals("Não existe ponto nas proximidades.") || progresso.equals("Não foi possível se conectar ao ponto.") ) {
                     connected = false;
-                    button.setEnabled(false);
-                    button.setText("Tentando se conectar...");
+                    conectar.setEnabled(false);
+                    conectar.setText("Tentando se conectar...");
+                    conectar.setBackgroundColor(Color.GRAY);
+
+                    textView.setText(progresso);
+                    speech.speak(textView.getText().toString());
                 }
-                else
+                else if (progresso.equals("Onibus se aproximando."))
                 {
-                    connected = true;
-                    button.setEnabled(false);
-                    button.setText("Desconectar");
-                    button.setEnabled(true);
+                    solicitarParada.setEnabled(true);
+                    solicitarParada.setBackgroundColor(Color.RED);
+
+                }else if(progresso.equals("Onibus passou.")){
+                    solicitarParada.setEnabled(false);
+                    solicitarParada.setBackgroundColor(Color.GRAY);
                 }
+                else if(progresso.equals("Parada Solicitada, e sua conexão com o ponto foi encerrada."))
+                {
+                    solicitarParada.setEnabled(false);
+                    solicitarParada.setBackgroundColor(Color.GRAY);
+                    connected = false;
+                    st = null;
+                    conectar.setEnabled(false);
+                    conectar.setText("Conectar");
+                    conectar.setEnabled(true);
+                    conectar.setBackgroundColor(Color.parseColor("#00ff08"));
+                    textView.setText(progresso);
+                    speech.speak(textView.getText().toString());
+                }
+                else{
+                    connected = true;
+                    conectar.setEnabled(false);
+                    conectar.setText("Desconectar");
+                    conectar.setEnabled(true);
+                    conectar.setBackgroundColor(Color.YELLOW);
 
-                textView.setText(progress[0]);
-                speech.speak(textView.getText().toString());
-
+                    textView.setText(progresso);
+                    speech.speak(textView.getText().toString());
+                }
             }
         };
     }

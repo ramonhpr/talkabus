@@ -16,6 +16,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 
+import android.os.CountDownTimer;
 import android.util.Log;
 
 
@@ -25,7 +26,7 @@ import android.util.Log;
 public class SocketTask extends AsyncTask<String, String, Boolean>{
 
     private Socket socket;
-    private boolean msgControl;
+    private boolean msgControl, paradaSolicitada;
     private InputStream is;
     private OutputStream os;
     private boolean exitTask;
@@ -33,6 +34,7 @@ public class SocketTask extends AsyncTask<String, String, Boolean>{
     private int port;
     private int timeout;
     private Context context;
+    private CountDownTimer timer;
 
     /**
      * Construtor com host, porta e timeout
@@ -54,6 +56,30 @@ public class SocketTask extends AsyncTask<String, String, Boolean>{
         this.host = host;
         this.port = port;
         this.timeout = timeout;
+        this.paradaSolicitada = false;
+        this.timer = new CountDownTimer(10000,1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if(paradaSolicitada)
+                {
+
+                    try {
+                        sendData("stop");
+                        exitTask = true;
+                        publishProgress("Parada Solicitada, e sua conexão com o ponto foi encerrada.");
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    paradaSolicitada = false;
+                }
+            }
+            @Override
+            public void onFinish() {
+                publishProgress("Onibus passou.");
+            }
+        };
+
     }
 
     //esse método envia a string recebida como parâmetro para o servidor
@@ -114,7 +140,7 @@ public class SocketTask extends AsyncTask<String, String, Boolean>{
                 List<ScanResult> scans = myWifiManager.getScanResults();
                 if(scans != null && !scans.isEmpty()){
                     for (ScanResult scan : scans) {
-                        if(scan.SSID.equals("Talkabus") && WifiManager.calculateSignalLevel(scan.level, 20) >= 10)
+                        if(scan.SSID.equals("Talkabus") && WifiManager.calculateSignalLevel(scan.level, 20) >= 5)
                         {
 
                             WifiConfiguration config = new WifiConfiguration();
@@ -165,10 +191,16 @@ public class SocketTask extends AsyncTask<String, String, Boolean>{
         return false;
     }
 
+    public void solicitarParada()
+    {
+        paradaSolicitada = true;
+    }
     @Override
     protected Boolean doInBackground(String... params) {
         String pontoDeOnibus;
         String nomeOnibus;
+
+
 
 
         while(!this.exitTask)
@@ -190,9 +222,13 @@ public class SocketTask extends AsyncTask<String, String, Boolean>{
                         while (!this.exitTask) {
                             nomeOnibus = receiveData();
 
-                            if (!nomeOnibus.equals("")) {
+                            if (!nomeOnibus.equals("") && !nomeOnibus.equals("disconnected")) {
+                                publishProgress("Onibus se aproximando.");
                                 publishProgress("O onibus " + nomeOnibus + " está se aproximando do ponto " + pontoDeOnibus + ".");
-                                // falta implementar solicitação de parada
+                                timer.start();
+                            }else if(nomeOnibus.equals("disconnected"))
+                            {
+                                exitTask = true;
                             }
                         }
 
@@ -205,7 +241,7 @@ public class SocketTask extends AsyncTask<String, String, Boolean>{
                         msgControl = true;
                     }
                 } catch (Exception e) {
-                    publishProgress("Erro inesperado...");
+                    publishProgress("Conexão com o ponto encerrada.");
                     msgControl = true;
                 }
             }else

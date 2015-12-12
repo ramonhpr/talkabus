@@ -4,26 +4,48 @@
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
+    android:background="#d2a49ef8">
 
     <TextView android:text="Talkabus" android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="189dp"
         android:textColor="@color/abc_primary_text_material_light"
         android:textSize="25dp"
         android:textStyle="bold"
-        android:id="@+id/textview" />
+        android:id="@+id/textview"
+        android:textAlignment="center"
+        android:layout_marginTop="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Conectar"
         android:id="@+id/button"
-        android:layout_below="@+id/textview"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="64dp"
         android:enabled="false"
-        android:focusableInTouchMode="false" />
+        android:focusableInTouchMode="false"
+        android:layout_marginBottom="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/button2"
+        android:layout_alignEnd="@+id/button2"
+        android:textColor="#000000"
+        android:background="#00ff08" />
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Solicitar Parada"
+        android:id="@+id/button2"
+        android:enabled="false"
+        android:focusableInTouchMode="false"
+        android:layout_above="@+id/button"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="84dp"
+        android:textColor="#000000"
+        android:background="#ebd6d6"
+        android:allowUndo="true" />
 </RelativeLayout>
